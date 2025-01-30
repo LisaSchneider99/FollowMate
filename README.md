@@ -4,7 +4,7 @@ Software for a robot that can follow people using foot bracelet
 ## Table of Contents
 1. [General Info](#general-info)
 2. [Technologies](#technologies)
-3. [Member](#member)
+3. [Members](#members)
 4. [Installation & Manual](#installation--manual)
 5. [Structure of the code](#Structure-of-the-code)
 6. [FAQ](#faq)
@@ -18,7 +18,7 @@ Such a robot can assist elderly people in navigating their homes, supermarkets, 
 
 The goal of this project is to create a reliable and intelligent solution for person detection and tracking, providing practical assistance in everyday situations.
 
-## Member
+## Members
 
 | Name     | E-Mail |
 | :---:        |    :----:   |
@@ -51,7 +51,7 @@ A list of technologies used within the project:
 
 ## Installation & Manual
 
-1. Assamble Picar-x Kit
+1. Assemble Picar-x Kit
 2. Install the needed Software on the Raspberry Pi
 3. Open a Terminal
 4. Install the necessary libraries using pip install 
@@ -61,11 +61,11 @@ A list of technologies used within the project:
 6. Type the command  into your terminal `git clone https://github.com/th-koeln-optec-messsysteme/SHC_Software.git`
 7. Enter the folder and run the code with `sudo python3 master.py`
 8. Speak out your desired color
-9. The Robot follows you around
+9. The robot will follow you
 
 ## Structure of the code
 
-Our code is structured in such a way that, the main loops are all located in the master.py. This file is than accessing the need 
+Our code is structured in such a way that, the main loops are all located in the master.py. This file is than accessing the necessary 
 functions from different files that provide specific functionality.
 
 For more information check the documentation
