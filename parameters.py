@@ -14,7 +14,7 @@ KNOWN_AREA = 10.0   # Actual area of the reference object in cm²
 LOWER_COLOR_GREEN = np.array([25, 180, 45])
 UPPER_COLOR_GREEN = np.array([45, 255, 255])
 
-LOWER_COLOR_PINK = np.array([120, 90, 100])
+LOWER_COLOR_PINK = np.array([120, 125, 100])
 UPPER_COLOR_PINK = np.array([140, 255, 255]) 
 
 LOWER_COLOR_ORANGE = np.array([105, 200, 70])
