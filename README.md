@@ -65,7 +65,7 @@ A list of technologies used within the project:
 
 ## Structure of the code
 
-Our code is structured in such a way that, the main loops are all located in the master.py. This file is than accessing the necessary 
+Our code is structured in such a way that, the main loops are all located in the `master.py`. This file is than accessing the necessary 
 functions from different files that provide specific functionality.
 
 For more information check the documentation
