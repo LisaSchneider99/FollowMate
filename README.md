@@ -1,5 +1,5 @@
 # FollowMate
-Software for a robot that can follow people using foot braclet
+Software for a robot that can follow people using foot bracelet
 
 ## Table of Contents
 1. [General Info](#general-info)
