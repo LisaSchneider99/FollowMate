@@ -31,7 +31,7 @@ A list of technologies used within the project:
 
 ### Languages:
 
-* Python 3.10.4 or higher <https://www.python.org/>
+* Python 3.11.2 or higher <https://www.python.org/>
 
 ### Libraries:
 
