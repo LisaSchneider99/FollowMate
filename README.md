@@ -36,18 +36,18 @@ A list of technologies used within the project:
 ### Libraries:
 
 **General:**
-* numpy 2.2.2 <https://pypi.org/project/numpy/>
+* numpy 1.24.2 <https://pypi.org/project/numpy/>
 
 **Computer Vision:**
-* opencv-python 4.11.0.86 <https://pypi.org/project/opencv-python/>
-* picamera2 0.3.24 <https://pypi.org/project/picamera2/>
+* opencv-python 4.10.0.84 <https://pypi.org/project/opencv-python/>
+* picamera2 0.3.22 <https://pypi.org/project/picamera2/>
 
 **Robot Control:**
-* picar-x <https://github.com/sunfounder/picar-x/>
-* robot_hat <https://github.com/sunfounder/robot-hat/>
+* picar-x 2.0.5 <https://github.com/sunfounder/picar-x/>
+* robot_hat 2.2.17 <https://github.com/sunfounder/robot-hat/>
 
 **Speech Recognition:**
-* SpeechRecognition 3.14.1 <https://pypi.org/project/SpeechRecognition/>
+* SpeechRecognition 3.11.0 <https://pypi.org/project/SpeechRecognition/>
 
 ## Installation & Manual
 
