@@ -2,51 +2,48 @@
 
 #-------------Import Libraries-------------
 
-import sys
 import cv2
 import numpy as np
 import picamera2 as picamera
 import time
 from picarx import Picarx
-from robot_hat import Servo, Motors
 import threading
 import queue
-from time import sleep
-from robot_hat import Music,TTS
-import readchar
-import subprocess
+from robot_hat import TTS
 import speech_recognition as sr
 
-#-------------Import additional python files-------------
+#-------------Import additional python files and classes -------------
 
 from parameters import *
-from timer import *
 import camera as cam
-import head_control as hc
-import wheel_control as wc
-import micro as mc
+import robot_control as rc
 
 class LatestQueue(queue.Queue):
+    """
+    Custom queue that always keeps only the latest item.
+    """
     def put(self, item, block=True, timeout=None):
-        # Ersetzt den alten Inhalt durch den neuesten Wert
-        with self.mutex:  # Gewährleistet Thread-Sicherheit
-            self.queue.clear()  # Löscht alte Werte
+        # Replaces old value with newest one
+        with self.mutex:  # Ensures thread saftey
+            self.queue.clear()  # Deletes old values
         super().put(item, block, timeout)
 
 #-------------Camera Thread-------------
 
 def camera_thread_function():
+  """
+  Captures frames from the camera, detects a target of a specific color, and calculates its distance.
+  """
   global initial_target
   global color
   target = False
-  counter = 0
 
   while True:
   
     distance_to_target_cam = [] #Distance calculated by camera frame analysis
     distance_to_target_us = [] #Distance calculated by ultra sound module
     
-    current_x = 0 #current 
+    current_x = 0 
     current_y = 0 
   
     for i in range(0,1):
@@ -55,7 +52,7 @@ def camera_thread_function():
       if STATUS:
         print(f"[Status] Frame captured")
       
-      x,y,height,frame_2,area = cam.detect_target(frame,color)
+      x,y,height,processed_frame = cam.detect_target(frame,color)
       
       if x != 0:
         current_x = x
@@ -63,10 +60,12 @@ def camera_thread_function():
       if y != 0:
         current_y = y       
       
-      resized_image = cv2.resize(frame_2, (640,480))
+      # Show current processed image
+      resized_image = cv2.resize(processed_frame, (640,480))
       cv2.imshow("Frame", resized_image)
       cv2.waitKey(1)
       
+      # Get distance values (Camera and Ultrasonic)
       current_distance_to_target_cam = cam.calculate_distance_to_target(height)
       current_distance_to_target_us = round(px.ultrasonic.read(), 2)
       
@@ -77,7 +76,6 @@ def camera_thread_function():
         if target == False:
           initial_target = True
           target = True
-          tts.say("Following Target")
           if STATUS:
             print("[Status] Following Target")
         
@@ -99,13 +97,16 @@ def camera_thread_function():
     if median_distance_to_target_us == -2: 
       median_distance_to_target_us = -1
     
+    # Put data in queue
     data = (median_distance_to_target_cam,median_distance_to_target_us, current_x, current_y,target)
-    
-    latest_queue.put(data)
+    latest_queue.put(data) 
     
 #-------------Servo Thread-------------
-    
+
 def servo_thread_function():
+    """
+    Controls the servo motors and directs the robot towards the detected target.
+    """
     global px
     global initial_target
     global start_time, current_time
@@ -114,29 +115,29 @@ def servo_thread_function():
     data = 0,0,0,0,0
     
     while True:
-      data = latest_queue.get()
-      #print(data)
+      data = latest_queue.get() # Get data from queue
       
       if STATUS:
         print(f"[Status] Data: {data}")
 
       median_distance_to_target_cam,median_distance_to_target_us, x, y, target = data
       
+      # Decide which distance value is more reliable (Camera or Ultrasonic)
       if abs(median_distance_to_target_cam - median_distance_to_target_us) < 20 and median_distance_to_target_cam != -1 and median_distance_to_target_us != -1:
         distance = median_distance_to_target_us
       else:
         distance = median_distance_to_target_cam
-      if median_distance_to_target_us > 10 and median_distance_to_target_us != -1: 
+
+      if median_distance_to_target_us > 10 and median_distance_to_target_us != -1:   
     
-        if target == True and x != 0 and y != 0 and median_distance_to_target_us > 10:
-          #print("Target True")
+        if target == True and x != 0 and y != 0:
           start_time = 0
-          offset_x , offset_y = hc.calculate_offset(x,y)
+          offset_x , offset_y = rc.calculate_offset(x,y)
         
-          hc.angle_calculation(offset_x, offset_y, median_distance_to_target_cam)
+          rc.angle_calculation(offset_x, offset_y, median_distance_to_target_cam)
           
-          pan = hc.get_pan_angle()
-          tilt = hc.get_tilt_angle()
+          pan = rc.get_pan_angle()
+          tilt = rc.get_tilt_angle()
 
           px.set_cam_tilt_angle(tilt)
           px.set_cam_pan_angle(pan)
@@ -160,30 +161,30 @@ def servo_thread_function():
           if current_time - start_time > 1 and current_time - start_time < 2 and start_time != 0: #When time difference between start and current moment is smaller than 2 seconds, drive backwards to find target again
               px.set_cam_pan_angle(15)
               px.set_dir_servo_angle(15)
-              hc.set_pan_angle(15)
+              rc.set_pan_angle(15)
           if current_time - start_time > 2 and current_time - start_time < 3 and start_time != 0:
               px.set_cam_pan_angle(30) 
               px.set_dir_servo_angle(30)
-              hc.set_pan_angle(30) 
+              rc.set_pan_angle(30) 
           if current_time - start_time > 3 and current_time - start_time < 4 and start_time != 0:
               px.set_cam_pan_angle(-15) 
               px.set_dir_servo_angle(-15)
-              hc.set_pan_angle(-15) 
+              rc.set_pan_angle(-15) 
           if current_time - start_time > 4 and current_time - start_time < 5 and start_time != 0:
               px.set_cam_pan_angle(-30) 
               px.set_dir_servo_angle(-30)
-              hc.set_pan_angle(-30)         
+              rc.set_pan_angle(-30)         
           if current_time - start_time > 5 and current_time - start_time < 6 and start_time != 0:
               px.set_dir_servo_angle(0)
               px.set_cam_pan_angle(0) 
-              hc.set_pan_angle(0)
+              rc.set_pan_angle(0)
               px.backward(10)
           elif current_time - start_time > 6 and current_time - start_time < 7 and start_time != 0: #If robot drove backwards for two seconds, Target ist completely lost. Stop Robot and play status message
             px.stop()
             tts.say("Lost Target")
           else: 
             px.stop()
-      elif median_distance_to_target_us != -1: 
+      elif median_distance_to_target_us != -1 and median_distance_to_target_us < 10: 
         print(median_distance_to_target_us)
         px.stop()
         tts.say("I can not drive forward. My way is blocked")
@@ -193,31 +194,27 @@ def servo_thread_function():
 #-------------Microphone routine-------
 
 def micro_thread_function():
+  """
+  Listens for voice commands and updates the target color accordingly.
+  """
   global color
   recognizer = sr.Recognizer()
 
   with sr.Microphone(sample_rate = RATE, chunk_size = CHUNK) as source:
-    print("Kalibriere Mikrofon für Umgebungsgeräusche...")
+    print("Calibrate microphone for ambient sound...")
     recognizer.adjust_for_ambient_noise(source)
-    print("Bereit. Sprechen Sie, um erkannt zu werden.")
+    print("Ready. You can speak now.")
 
     try:
         while True:
-            print("\nHöre zu...")
-            # Audio aufnehmen
+            print("\nListening...")
             audio_data = recognizer.listen(source)
-
-            # Verstärke das Audio
-            #amplified_audio = mc.process_audio(audio_data)
-
-            # Sprache in Text umwandeln
             try:
                 text = recognizer.recognize_google(audio_data, language="en-US")
-                print("Erkannter Text:", text)
+                print("Recognized Text:", text)
                 text_lower = text.lower()
-                #print(f"text_lower {text_lower}")
                 for colors in ["green", "blue", "pink", "yellow", "red", "orange"]:
-                  if colors in text_lower: #and color != colors:
+                  if colors in text_lower: 
                     color = colors
                     match color: #Check hsv frame for specific color
                       case "blue":
@@ -235,12 +232,12 @@ def micro_thread_function():
                       case _ :
                         tts.say("No color selected.")
             except sr.UnknownValueError:
-                print("Entschuldigung, ich konnte Sie nicht verstehen.")            
+                print("Sorry, I couldn't understand you.")            
             except sr.RequestError as e:
-                print(f"Fehler beim Abrufen der Ergebnisse: {e}")
+                print(f"Error: {e}")
 
     except KeyboardInterrupt:
-        print("\nBeende die Erkennung.")
+        print("\nEnd of speech recognition.")
 
 
 #-------------Main routine-------------
@@ -250,17 +247,13 @@ try:
   initial_target = False
   start_time = 0
   current_time = 0
-  color = "red"
+  color = "green"
 
   px = Picarx()
   
-  wc.servo_zeroing()
+  rc.servo_zeroing()
     
   latest_queue = LatestQueue()
-  
-  tts = TTS()
-  tts.lang("en-US")
-  tts.say("Hello my name is Picar X. I am now following you around")
   
   camera = picamera.Picamera2()  # Initialize Camera
   camera.configure(camera.create_still_configuration())  # Configure camera for still pictures
@@ -277,6 +270,10 @@ try:
   camera_thread.start()
   servo_thread.start()
   micro_thread.start()
+
+  tts = TTS()
+  tts.lang("en-US")
+  tts.say("Hello my name is Follow Mate. I am now following you around")
       
 finally: 
   px.stop()
