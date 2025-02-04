@@ -58,7 +58,7 @@ A list of technologies used within the project:
     
     Example: `pip install pandas` or `pip install -r requirements.txt` to download all needed libraries with one command
 5. Go to the desired location for the repository with `cd /Path`
-6. Type the command  into your terminal `git clone https://github.com/th-koeln-optec-messsysteme/SHC_Software.git`
+6. Type the command  into your terminal `git clone https://github.com/LisaSchneider99/FollowMate.git`
 7. Enter the folder and run the code with `sudo python3 master.py`
 8. Speak out your desired color
 9. The robot will follow you
