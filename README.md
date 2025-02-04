@@ -56,7 +56,7 @@ A list of technologies used within the project:
 3. Open a Terminal
 4. Install the necessary libraries using pip install 
     
-    Example: `pip install pandas` or `pip install -r requirements.txt` to download all needed libraries with one command
+    Example: `pip install numpy` or `pip install -r requirements.txt` to download all needed libraries with one command
 5. Go to the desired location for the repository with `cd /Path`
 6. Type the command  into your terminal `git clone https://github.com/LisaSchneider99/FollowMate.git`
 7. Enter the folder and run the code with `sudo python3 master.py`
